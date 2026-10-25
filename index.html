@@ -53,6 +53,11 @@
       background-size: 28px 28px;
       opacity: 0.18;
       mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
+      animation: grid-drift 26s linear infinite;
+    }
+
+    @keyframes grid-drift {
+      to { background-position: 28px 28px; }
     }
 
     .scan {
@@ -69,6 +74,48 @@
       );
     }
 
+    /* CRT scan bar that sweeps down the page */
+    .scanbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: -90px;
+      height: 90px;
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 212, 255, 0.05),
+        rgba(0, 212, 255, 0.08),
+        rgba(0, 212, 255, 0.05),
+        transparent
+      );
+      animation: scan-sweep 8.5s linear infinite;
+    }
+
+    @keyframes scan-sweep {
+      0%   { top: -90px; }
+      100% { top: 110%; }
+    }
+
+    /* Twinkling pixel stars in the background (spawned by JS) */
+    .twinkle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      animation: twinkle var(--tw-dur, 3s) steps(2, end) infinite;
+      animation-delay: var(--tw-delay, 0s);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.65; }
+      50%      { opacity: 0.04; }
+    }
+
     .wrap {
       position: relative;
       z-index: 2;
@@ -83,6 +130,18 @@
       font-family: "Pixelify Sans", sans-serif;
     }
 
+    /* ---------- Avatar ---------- */
+    .avatar-float {
+      animation:
+        rise-spring 0.9s cubic-bezier(0.22, 1.35, 0.36, 1) both,
+        avatar-float 4.5s ease-in-out 1.2s infinite;
+    }
+
+    @keyframes avatar-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-9px); }
+    }
+
     .avatar-frame {
       width: 168px;
       height: 168px;
@@ -94,6 +153,29 @@
         0 0 0 8px #38bdf8;
       background: var(--bg);
       image-rendering: pixelated;
+      transition: transform 0.25s ease;
+      animation: frame-glow 3.2s ease-in-out infinite;
+    }
+
+    .avatar-frame:hover {
+      transform: scale(1.045) rotate(1.5deg);
+    }
+
+    @keyframes frame-glow {
+      0%, 100% {
+        box-shadow:
+          6px 6px 0 var(--shadow),
+          0 0 0 4px var(--bg),
+          0 0 0 8px #38bdf8,
+          0 0 22px rgba(0, 212, 255, 0.25);
+      }
+      50% {
+        box-shadow:
+          6px 6px 0 var(--shadow),
+          0 0 0 4px var(--bg),
+          0 0 0 8px #38bdf8,
+          0 0 46px rgba(0, 212, 255, 0.6);
+      }
     }
 
     .avatar-frame img {
@@ -105,23 +187,60 @@
       display: block;
     }
 
+    /* Fallback when dark-logo.png is missing */
+    .avatar-frame.no-logo::before {
+      content: "CR";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: "Press Start 2P", cursive;
+      font-size: 36px;
+      color: var(--ink);
+      background:
+        repeating-conic-gradient(#111 0% 25%, #191919 0% 50%) 0 0 / 16px 16px;
+      text-shadow: 4px 4px 0 var(--shadow);
+    }
+
+    /* Random avatar glitch (triggered by JS) */
+    .avatar-frame.avatar-glitch img {
+      animation: img-glitch 0.36s steps(3, end);
+    }
+
+    @keyframes img-glitch {
+      0%   { transform: translate(0, 0); filter: none; }
+      30%  { transform: translate(-3px, 1px); filter: hue-rotate(90deg) saturate(2); }
+      60%  { transform: translate(3px, -2px); filter: invert(0.15); }
+      100% { transform: translate(0, 0); filter: none; }
+    }
+
     .spark {
       position: absolute;
       color: #22e05a;
       font-family: "Press Start 2P", cursive;
       font-size: 10px;
-      animation: blink 1.4s steps(2, end) infinite;
+      animation:
+        blink 1.4s steps(2, end) infinite,
+        spark-drift 3.4s ease-in-out infinite;
       pointer-events: none;
+      z-index: 3;
     }
 
     .spark.cyan {
       color: #00d4ff;
+      animation-delay: 0.4s, 0.4s;
+    }
+
+    @keyframes spark-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(2px, -5px) scale(1.35); }
     }
 
     @keyframes blink {
       50% { opacity: 0; }
     }
 
+    /* ---------- Link cards ---------- */
     .link-card {
       display: flex;
       align-items: center;
@@ -133,6 +252,8 @@
       border: 3px solid var(--ink);
       text-decoration: none;
       box-shadow: 4px 4px 0 var(--shadow);
+      position: relative;
+      overflow: hidden;
       transition:
         background-color 0.18s ease,
         box-shadow 0.18s ease,
@@ -150,6 +271,56 @@
       box-shadow: 2px 2px 0 var(--accent, #00d4ff);
     }
 
+    /* Shine sweep across the card on hover */
+    .link-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        115deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.09) 50%,
+        transparent 65%
+      );
+      transform: translateX(-130%);
+    }
+
+    .link-card:hover::after {
+      animation: shine 0.75s ease forwards;
+    }
+
+    @keyframes shine {
+      to { transform: translateX(130%); }
+    }
+
+    /* Retro wiggle on the icon box when hovering the card */
+    .link-card:hover .icon-box {
+      animation: icon-wiggle 0.42s steps(8, end);
+    }
+
+    @keyframes icon-wiggle {
+      0%   { transform: rotate(0deg) scale(1); }
+      25%  { transform: rotate(-9deg) scale(1.08); }
+      50%  { transform: rotate(8deg) scale(1.08); }
+      75%  { transform: rotate(-5deg) scale(1.04); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    /* Arrow nudges forward on hover */
+    .link-card .arrow {
+      transition: transform 0.18s ease;
+    }
+
+    .link-card:hover .arrow {
+      animation: arrow-nudge 0.55s ease infinite;
+    }
+
+    @keyframes arrow-nudge {
+      0%, 100% { transform: translateX(0); }
+      50%      { transform: translateX(5px); }
+    }
+
     .icon-box {
       width: 42px;
       height: 42px;
@@ -159,6 +330,11 @@
       border: 3px solid var(--ink);
       background: var(--bg-soft);
       color: var(--accent, var(--ink));
+      transition: box-shadow 0.18s ease;
+    }
+
+    .link-card:hover .icon-box {
+      box-shadow: 3px 3px 0 var(--accent, #00d4ff);
     }
 
     .chip {
@@ -168,6 +344,18 @@
       border: 2px solid var(--line);
       background: var(--bg-soft);
       color: var(--ink);
+      animation: pixel-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .chip:nth-child(1) { animation-delay: 0.42s; }
+    .chip:nth-child(2) { animation-delay: 0.52s; }
+    .chip:nth-child(3) { animation-delay: 0.62s; }
+
+    @keyframes pixel-pop {
+      0%   { opacity: 0; transform: scale(0.3); }
+      60%  { opacity: 1; transform: scale(1.18); }
+      80%  { transform: scale(0.94); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     .chip svg {
@@ -175,19 +363,65 @@
       display: block;
     }
 
-    .rise {
-      animation: rise 0.7s ease both;
+    .pulse-green {
+      animation: pulse-green 2.2s ease-in-out infinite;
     }
 
-    @keyframes rise {
+    @keyframes pulse-green {
+      0%, 100% { text-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+      50%      { text-shadow: 0 0 14px rgba(34, 197, 94, 0.85); }
+    }
+
+    /* ---------- Entrance + title ---------- */
+    .rise {
+      animation: rise-spring 0.85s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+    }
+
+    @keyframes rise-spring {
       from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(26px) scale(0.96);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
+    }
+
+    /* Typewriter title: JS types the text, cursor keeps blinking */
+    #site-title {
+      display: inline-flex;
+      justify-content: center;
+      align-items: baseline;
+      white-space: nowrap;
+    }
+
+    .type-cursor {
+      display: inline-block;
+      color: #00d4ff;
+      animation: blink 1s steps(1, end) infinite;
+    }
+
+    /* RGB-split glitch, applied briefly by JS every few seconds */
+    .glitching {
+      animation: title-glitch 0.32s steps(2, end) 2;
+    }
+
+    @keyframes title-glitch {
+      0%   { text-shadow: 2px 0 #ff1a3c, -2px 0 #00d4ff; transform: translate(0, 0); }
+      25%  { text-shadow: -2px 0 #ff1a3c, 2px 0 #00d4ff; transform: translate(1px, -1px); }
+      50%  { text-shadow: 2px 0 #22e05a, -2px 0 #ff1a3c; transform: translate(-1px, 1px); }
+      75%  { text-shadow: -2px 0 #00d4ff, 2px 0 #22e05a; transform: translate(1px, 0); }
+      100% { text-shadow: none; transform: translate(0, 0); }
+    }
+
+    /* Burst particles (spawned by JS on card clicks) */
+    .particle {
+      position: fixed;
+      z-index: 60;
+      width: 7px;
+      height: 7px;
+      pointer-events: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -195,32 +429,35 @@
         animation: none !important;
         transition: none !important;
       }
+      .twinkle, .particle, .scanbar { display: none !important; }
     }
   </style>
 </head>
 <body>
   <div class="pixel-grid"></div>
   <div class="scan"></div>
+  <div class="scanbar" aria-hidden="true"></div>
 
   <div class="wrap min-h-dvh flex flex-col items-center px-4 py-8 sm:py-12">
     <div class="w-full max-w-[420px]">
       <main class="flex flex-col items-center text-center">
-        <div class="relative rise" style="animation-delay: 0.08s">
+        <div class="relative avatar-float" style="animation-delay: 0.08s, 1.2s">
           <div class="avatar-frame overflow-hidden">
-            <img src="dark-logo.png" alt="Profile avatar" width="168" height="168" />
+            <img src="dark-logo.png" alt="Profile avatar" width="168" height="168"
+                 onerror="this.remove(); this.parentElement.classList.add('no-logo');" />
           </div>
           <span class="spark" style="top: 8px; right: -6px;">+</span>
           <span class="spark cyan" style="bottom: 10px; left: -8px;">+</span>
         </div>
 
-        <h1 class="pixel-title mt-7 text-[15px] sm:text-[17px] leading-relaxed rise" style="animation-delay: 0.16s">
+        <h1 id="site-title" class="pixel-title mt-7 text-[15px] sm:text-[17px] leading-relaxed rise" style="animation-delay: 0.16s">
           CheckRAR
         </h1>
         <p class="pixel-soft mt-2 text-xl tracking-wide rise" style="animation-delay: 0.22s; color: var(--muted)">
-          0$ <span style="color: #22c55e">Cost</span>
+          0.00$ <span class="pulse-green" style="color: #22c55e">Cost</span>
         </p>
-        <p class="mt-3 max-w-[34ch] text-sm leading-6 rise" style="animation-delay: 0.28s; color: var(--muted)">
-         CheckRaR - Community - Link Below
+        <p class="pixel-soft mt-3 max-w-[34ch] text-base tracking-wide leading-6 rise" style="animation-delay: 0.28s; color: var(--muted)">
+        ONLY CHECKRAR CAN DO IT ! 
         </p>
 
         <div class="mt-4 flex flex-wrap items-center justify-center gap-2 rise" style="animation-delay: 0.32s">
@@ -234,9 +471,9 @@
           <span class="chip pixel-soft px-2.5 py-1 text-sm">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="9" fill="#3b82f6" />
-              <ellipse cx="12" cy="12" rx="4" ry="9" stroke="#93c5fd" stroke-width="1.6" />
-              <path d="M3.5 12h17M5.2 8h13.6M5.2 16h13.6" stroke="#86efac" stroke-width="1.4" stroke-linecap="round"/>
-              <circle cx="12" cy="12" r="9" stroke="#1d4ed8" stroke-width="1.4" />
+              <path d="M7.2 8.2h1.7l1.3 5.4a1.2 1.2 0 0 0 1.2.9h4.6a1.2 1.2 0 0 0 1.2-.9l1.1-4.1H9.2" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10.8" cy="17.3" r="1.05" fill="#fff" />
+              <circle cx="15.2" cy="17.3" r="1.05" fill="#fff" />
             </svg>
             Paid
           </span>
@@ -260,7 +497,7 @@
               <span class="pixel-soft block text-lg leading-none">Telegram Channel</span>
               <span class="mt-1 block text-xs" style="color: var(--muted)">news, drops & updates</span>
             </span>
-            <span class="pixel-title text-[10px]" aria-hidden="true">›</span>
+            <span class="pixel-title arrow text-[10px]" aria-hidden="true">›</span>
           </a>
 
           <a class="link-card rise" style="--accent: #00d4ff; animation-delay: 0.46s" href="https://t.me/checkrar" target="_blank" rel="noopener noreferrer">
@@ -274,7 +511,7 @@
               <span class="pixel-soft block text-lg leading-none">Personal Telegram</span>
               <span class="mt-1 block text-xs" style="color: var(--muted)">dm me directly : CheckRaR</span>
             </span>
-            <span class="pixel-title text-[10px]" aria-hidden="true">›</span>
+            <span class="pixel-title arrow text-[10px]" aria-hidden="true">›</span>
           </a>
 
           <a class="link-card rise" style="--accent: #ff1a3c; animation-delay: 0.54s" href="https://youtube.com/@checkrar" target="_blank" rel="noopener noreferrer">
@@ -287,7 +524,7 @@
               <span class="pixel-soft block text-lg leading-none">YouTube</span>
               <span class="mt-1 block text-xs" style="color: var(--muted)">watch the full tutorial : CheckRaR</span>
             </span>
-            <span class="pixel-title text-[10px]" aria-hidden="true">›</span>
+            <span class="pixel-title arrow text-[10px]" aria-hidden="true">›</span>
           </a>
 
           <a class="link-card rise" style="--accent: #22e05a; animation-delay: 0.62s" href="https://tiktok.com/@checkrar" target="_blank" rel="noopener noreferrer">
@@ -300,13 +537,13 @@
               <span class="pixel-soft block text-lg leading-none">TikTok</span>
               <span class="mt-1 block text-xs" style="color: var(--muted)">Tutorial - Short : CheckRaR</span>
             </span>
-            <span class="pixel-title text-[10px]" aria-hidden="true">›</span>
+            <span class="pixel-title arrow text-[10px]" aria-hidden="true">›</span>
           </a>
         </nav>
 
         <footer class="mt-10 mb-4 text-center rise" style="animation-delay: 0.7s">
           <p class="pixel-title text-[8px] leading-5" style="color: var(--muted)">
-            © <span id="year"></span> CheckRAR
+            © <span id="year"></span> copyright by CheckRAR know as ZrixDev
           </p>
         </footer>
       </main>
@@ -314,7 +551,126 @@
   </div>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    (function () {
+      "use strict";
+
+      /* Footer year */
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      /* Respect users who prefer reduced motion */
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) return; // CSS media query already disables the rest
+
+      /* ---------- Twinkling pixel stars ---------- */
+      (function spawnTwinkles() {
+        var colors = ["#f3f3f3", "#00d4ff", "#22e05a", "#38bdf8"];
+        for (var i = 0; i < 26; i++) {
+          var s = document.createElement("span");
+          s.className = "twinkle";
+          var size = 3 + Math.floor(Math.random() * 3);
+          s.style.width = size + "px";
+          s.style.height = size + "px";
+          s.style.left = Math.random() * 100 + "vw";
+          s.style.top = Math.random() * 100 + "vh";
+          s.style.background = colors[Math.floor(Math.random() * colors.length)];
+          s.style.setProperty("--tw-dur", 2.4 + Math.random() * 3.4 + "s");
+          s.style.setProperty("--tw-delay", Math.random() * 4 + "s");
+          document.body.appendChild(s);
+        }
+      })();
+
+      /* ---------- Typewriter title ---------- */
+      (function typewriter() {
+        var h1 = document.getElementById("site-title");
+        if (!h1) return;
+        var full = h1.textContent.trim();
+        if (!full) return;
+
+        /* Reserve the final width so the layout never jitters */
+        h1.style.minWidth = (full.length + 1.2) + "ch";
+
+        var textSpan = document.createElement("span");
+        var cursor = document.createElement("span");
+        cursor.className = "type-cursor";
+        cursor.setAttribute("aria-hidden", "true");
+        cursor.textContent = "▮";
+        h1.textContent = "";
+        h1.appendChild(textSpan);
+        h1.appendChild(cursor);
+        h1.setAttribute("aria-label", full);
+
+        var i = 0;
+        var startDelay = 650;
+        setTimeout(function tick() {
+          if (i < full.length) {
+            textSpan.textContent = full.slice(0, ++i);
+            setTimeout(tick, 110 + Math.random() * 90);
+          } else {
+            /* After typing: periodic RGB-split glitch */
+            setInterval(function () {
+              h1.classList.add("glitching");
+              setTimeout(function () { h1.classList.remove("glitching"); }, 700);
+            }, 5200 + Math.floor(Math.random() * 2600));
+          }
+        }, startDelay);
+      })();
+
+      /* ---------- Random avatar glitch ---------- */
+      (function avatarGlitch() {
+        var frame = document.querySelector(".avatar-frame");
+        if (!frame || frame.classList.contains("no-logo")) return;
+        setInterval(function () {
+          frame.classList.add("avatar-glitch");
+          setTimeout(function () { frame.classList.remove("avatar-glitch"); }, 400);
+        }, 7400 + Math.floor(Math.random() * 3200));
+      })();
+
+      /* ---------- Pixel particle burst on card clicks ---------- */
+      (function bursts() {
+        var palette = ["#00d4ff", "#22e05a", "#f3f3f3", "#2AABEE", "#ff1a3c"];
+
+        function burst(x, y, accent) {
+          var colors = [accent].concat(palette);
+          for (var i = 0; i < 14; i++) {
+            var p = document.createElement("span");
+            p.className = "particle";
+            var size = 4 + Math.floor(Math.random() * 4);
+            p.style.width = size + "px";
+            p.style.height = size + "px";
+            p.style.left = x - size / 2 + "px";
+            p.style.top = y - size / 2 + "px";
+            p.style.background = colors[i % colors.length];
+            document.body.appendChild(p);
+
+            var ang = Math.random() * Math.PI * 2;
+            var vel = 46 + Math.random() * 74;
+            var dx = Math.cos(ang) * vel;
+            var dy = Math.sin(ang) * vel - 46;
+            p.animate(
+              [
+                { transform: "translate(0, 0) scale(1)", opacity: 1 },
+                {
+                  transform: "translate(" + dx + "px, " + (dy + 90) + "px) scale(0.4)",
+                  opacity: 0
+                }
+              ],
+              {
+                duration: 560 + Math.random() * 340,
+                easing: "cubic-bezier(0.22, 0.9, 0.3, 1)",
+                fill: "forwards"
+              }
+            ).onfinish = (function (el) { return function () { el.remove(); }; })(p);
+          }
+        }
+
+        document.querySelectorAll(".link-card").forEach(function (card) {
+          card.addEventListener("pointerdown", function (e) {
+            var accent = getComputedStyle(card).getPropertyValue("--accent").trim() || "#00d4ff";
+            burst(e.clientX, e.clientY, accent);
+          });
+        });
+      })();
+    })();
   </script>
 </body>
 </html>
